@@ -3,45 +3,49 @@ class WordGuesserGame
   attr_accessor :word, :guesses, :wrong_guesses
 
   def initialize(word)
-    @word = word
-    @guesses = ''
-    @wrong_guesses = ''
+    @word = word.to_s.downcase
+    @guesses = ""         # correct letters guessed (unique, lowercased)
+    @wrong_guesses = ""   # wrong letters guessed (unique, lowercased)
   end
 
+  # Process a single-letter guess.
+  # Returns true if the guess is in the word, false otherwise.
   def guess(letter)
-    raise ArgumentError if letter.nil? || letter == ''
-    letter = letter.downcase
-    raise ArgumentError unless letter =~ /^[a-z]$/
+    raise ArgumentError if letter.nil? || letter == "" || letter !~ /[A-Za-z]/
 
-    return false if @guesses.include?(letter) || @wrong_guesses.include?(letter)
+    ch = letter.downcase
 
-    if @word.downcase.include?(letter)
-      @guesses << letter
+    # If already guessed (right or wrong), do nothing (controller will message)
+    return false if @guesses.include?(ch) || @wrong_guesses.include?(ch)
+
+    if @word.include?(ch)
+      @guesses << ch
+      true
     else
-      @wrong_guesses << letter
+      @wrong_guesses << ch
+      false
     end
-    true
   end
 
+  # Reveal the word with dashes for unguessed letters
   def word_with_guesses
-    @word.chars.map { |ch|
-      @guesses.include?(ch.downcase) ? ch : '-'
-    }.join
+    @word.chars.map { |c| @guesses.include?(c) ? c : '-' }.join
   end
 
+  # :win if fully guessed, :lose if too many wrong, else :play
   def check_win_or_lose
     return :win  if word_with_guesses == @word
     return :lose if @wrong_guesses.length >= 7
     :play
   end
 
-  # Provided helper to fetch a random word
+  # Provided in the starter; keep as-is
   def self.get_random_word
     require 'uri'
     require 'net/http'
     uri = URI('http://randomword.saasbook.info/RandomWord')
     Net::HTTP.new('randomword.saasbook.info').start do |http|
-      http.post(uri, '').body
+      return http.post(uri, "").body
     end
   end
 end
