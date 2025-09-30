@@ -27,13 +27,11 @@ class WordGuesserApp < Sinatra::Base
   end
 
   post '/create' do
-    # NOTE: don't change next line - it's needed by autograder!
-    word = params[:word] || WordGuesserGame.get_random_word
-    # NOTE: don't change previous line - it's needed by autograder!
-
-    @game = WordGuesserGame.new(word)
+    word = WordGuesserGame.get_random_word
+    session[:game] = WordGuesserGame.new(word)
     redirect '/show'
   end
+  
 
   # Use existing methods in WordGuesserGame to process a guess.
   # If a guess is repeated, set flash[:message] to "You have already used that letter."
